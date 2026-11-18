@@ -4,6 +4,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Pressable,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   View,
@@ -26,6 +27,9 @@ interface TelaProps {
   rolavel?: boolean;
   /** Bordas protegidas pela safe area. Telas dentro de abas não precisam da borda inferior. */
   bordas?: Edge[];
+  /** Puxar para atualizar (pull-to-refresh) no conteúdo rolável. */
+  aoAtualizar?: () => void;
+  atualizando?: boolean;
 }
 
 /** Estrutura padrão de tela: safe area, cabeçalho, teclado e rolagem. */
@@ -37,6 +41,8 @@ export function Tela({
   acaoDireita,
   rolavel = true,
   bordas = ['top', 'bottom'],
+  aoAtualizar,
+  atualizando = false,
 }: TelaProps) {
   const { cores } = useTema();
 
@@ -76,6 +82,16 @@ export function Tela({
             contentContainerStyle={estilos.conteudo}
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
+            refreshControl={
+              aoAtualizar ? (
+                <RefreshControl
+                  refreshing={atualizando}
+                  onRefresh={aoAtualizar}
+                  colors={[cores.primaria]}
+                  tintColor={cores.primaria}
+                />
+              ) : undefined
+            }
           >
             {cabecalho}
             {children}

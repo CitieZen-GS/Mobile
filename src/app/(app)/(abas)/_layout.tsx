@@ -37,6 +37,10 @@ export default function LayoutAbas() {
         name="medicamentos"
         options={{ title: 'Remédios', tabBarIcon: iconeDaAba('medkit') }}
       />
+      <Tabs.Screen
+        name="consultas"
+        options={{ title: 'Consultas', tabBarIcon: iconeDaAba('calendar') }}
+      />
       <Tabs.Screen name="perfil" options={{ title: 'Perfil', tabBarIcon: iconeDaAba('person') }} />
     </Tabs>
   );

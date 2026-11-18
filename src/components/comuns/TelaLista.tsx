@@ -1,5 +1,5 @@
 import { UseQueryResult } from '@tanstack/react-query';
-import { ReactElement } from 'react';
+import { ReactElement, ReactNode } from 'react';
 import { FlatList, RefreshControl, StyleSheet } from 'react-native';
 import { useTema } from '@/contexts/TemaContext';
 import { extrairMensagemErro } from '@/services/api';
@@ -21,6 +21,8 @@ interface TelaListaProps<T> {
   rotuloCriar?: string;
   /** Nenhum idoso selecionado: a lista não pode ser carregada. */
   semIdoso?: boolean;
+  /** Conteúdo fixo acima da lista (ex.: filtros). */
+  acimaDaLista?: ReactNode;
 }
 
 /**
@@ -37,6 +39,7 @@ export function TelaLista<T>({
   aoCriar,
   rotuloCriar = 'Adicionar',
   semIdoso = false,
+  acimaDaLista,
 }: TelaListaProps<T>) {
   const { cores } = useTema();
 
@@ -89,6 +92,7 @@ export function TelaLista<T>({
 
   return (
     <Tela titulo={titulo} subtitulo={subtitulo} rolavel={false} bordas={['top']}>
+      {!semIdoso && acimaDaLista}
       {conteudo}
       {aoCriar && !semIdoso && !!consulta.data?.length && (
         <BotaoFlutuante aoPressionar={aoCriar} rotuloAcessivel={rotuloCriar} />

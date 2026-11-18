@@ -1,4 +1,4 @@
-import axios, { AxiosError, AxiosInstance } from 'axios';
+import { AxiosError, AxiosInstance, create, isAxiosError } from 'axios';
 import { ErroRespostaApi } from '@/types/erro';
 
 /**
@@ -25,7 +25,7 @@ export function registrarAoSessaoExpirar(callback: (() => void) | null) {
 }
 
 function criarCliente(baseURL: string): AxiosInstance {
-  const cliente = axios.create({
+  const cliente = create({
     baseURL,
     timeout: TEMPO_LIMITE_MS,
     headers: { 'Content-Type': 'application/json' },
@@ -63,7 +63,7 @@ export const apiAutenticacao = criarCliente(URL_AUTENTICACAO);
  * Usa a ErroResposta padronizada da API quando ela existe.
  */
 export function extrairMensagemErro(erro: unknown): string {
-  if (!axios.isAxiosError(erro)) {
+  if (!isAxiosError(erro)) {
     return erro instanceof Error ? erro.message : 'Ocorreu um erro inesperado.';
   }
 

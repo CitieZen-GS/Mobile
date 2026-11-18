@@ -1,6 +1,7 @@
 export { Aviso } from './Aviso';
 export { Botao } from './Botao';
 export { BotaoFlutuante } from './BotaoFlutuante';
+export { BotaoExcluir } from './BotaoExcluir';
 export { CampoTexto } from './CampoTexto';
 export { Cartao } from './Cartao';
 export { Carregando, EstadoVazio, MensagemErro } from './Estados';
@@ -9,3 +10,4 @@ export { SeletorOpcoes, type Opcao } from './SeletorOpcoes';
 export { Selo } from './Selo';
 export { Tela } from './Tela';
 export { Texto } from './Texto';
+export { TelaLista } from './TelaLista';

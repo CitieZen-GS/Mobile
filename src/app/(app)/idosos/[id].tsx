@@ -1,19 +1,17 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect } from 'react';
-import { Pressable } from 'react-native';
 import {
   Aviso,
   Botao,
+  BotaoExcluir,
   CampoTexto,
   Carregando,
-  Icone,
   MensagemErro,
   Selo,
   Tela,
 } from '@/components/comuns';
 import { useAutenticacao } from '@/contexts/AutenticacaoContext';
 import { useIdosoSelecionado } from '@/contexts/IdosoSelecionadoContext';
-import { useTema } from '@/contexts/TemaContext';
 import { useFormulario } from '@/hooks/useFormulario';
 import { useIdoso, useRemoverIdoso, useSalvarIdoso } from '@/hooks/useIdosos';
 import { extrairMensagemErro } from '@/services/api';
@@ -80,7 +78,6 @@ function regras(f: FormularioIdoso): ErrosFormulario<FormularioIdoso> {
 
 /** Ficha do idoso: cadastro (id = "novo"), edição e exclusão. Familiar só visualiza. */
 export default function TelaFichaIdoso() {
-  const { cores } = useTema();
   const { id } = useLocalSearchParams<{ id: string }>();
   const ehNovo = id === 'novo';
   const idNumerico = ehNovo ? undefined : Number(id);
@@ -167,14 +164,7 @@ export default function TelaFichaIdoso() {
       subtitulo={idNumerico ? `Código ${idNumerico} — compartilhe com a família` : undefined}
       acaoDireita={
         !ehNovo && ehCuidador ? (
-          <Pressable
-            onPress={excluir}
-            accessibilityRole="button"
-            accessibilityLabel="Excluir idoso"
-            hitSlop={12}
-          >
-            <Icone nome="trash-outline" cor={cores.erro} tamanho={26} />
-          </Pressable>
+          <BotaoExcluir aoPressionar={excluir} rotuloAcessivel="Excluir idoso" />
         ) : undefined
       }
     >

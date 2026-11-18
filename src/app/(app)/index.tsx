@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import { Botao, Tela, Texto } from '@/components/comuns';
 import { useAutenticacao } from '@/contexts/AutenticacaoContext';
 
@@ -9,6 +10,11 @@ export default function TelaInicio() {
       <Texto cor="textoSecundario">
         Perfil: {usuario?.perfil === 'CUIDADOR' ? 'Cuidador' : 'Familiar'}
       </Texto>
+      <Botao
+        titulo="Meus idosos"
+        icone="people-outline"
+        aoPressionar={() => router.push('/idosos')}
+      />
       <Botao titulo="Sair" variante="perigo" icone="log-out-outline" aoPressionar={sair} />
     </Tela>
   );

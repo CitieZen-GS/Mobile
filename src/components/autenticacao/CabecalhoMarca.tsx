@@ -1,7 +1,8 @@
-import { StyleSheet, View } from 'react-native';
-import { Icone, Texto } from '@/components/comuns';
-import { useTema } from '@/contexts/TemaContext';
+import { Image, StyleSheet, View } from 'react-native';
+import { Texto } from '@/components/comuns';
 import { espacos } from '@/styles/tema';
+
+const LOGO = require('../../../assets/images/logo.png');
 
 interface CabecalhoMarcaProps {
   subtitulo: string;
@@ -9,13 +10,15 @@ interface CabecalhoMarcaProps {
 
 /** Logo + nome do app no topo das telas de login e cadastro. */
 export function CabecalhoMarca({ subtitulo }: CabecalhoMarcaProps) {
-  const { cores } = useTema();
-
   return (
     <View style={estilos.container}>
-      <View style={[estilos.logo, { backgroundColor: cores.primariaClara }]}>
-        <Icone nome="heart" tamanho={44} cor={cores.primaria} />
-      </View>
+      <Image
+        source={LOGO}
+        style={estilos.logo}
+        accessibilityIgnoresInvertColors
+        accessible
+        accessibilityLabel="Logo do Ajudante Familiar: um coração grande protegendo um menor"
+      />
       <Texto variante="tituloGrande" centralizado accessibilityRole="header">
         Ajudante Familiar
       </Texto>
@@ -28,12 +31,5 @@ export function CabecalhoMarca({ subtitulo }: CabecalhoMarcaProps) {
 
 const estilos = StyleSheet.create({
   container: { alignItems: 'center', gap: espacos.sm, marginVertical: espacos.lg },
-  logo: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: espacos.sm,
-  },
+  logo: { width: 112, height: 112, marginBottom: espacos.sm },
 });

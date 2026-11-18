@@ -1,3 +1,4 @@
+export { Aviso } from './Aviso';
 export { Botao } from './Botao';
 export { BotaoFlutuante } from './BotaoFlutuante';
 export { CampoTexto } from './CampoTexto';

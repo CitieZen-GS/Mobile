@@ -33,7 +33,7 @@ const porHora = <T,>(itens: T[], hora: (item: T) => string | null) =>
 /** Tela inicial: resumo do dia do idoso acompanhado (GET /idosos/{id}/resumo). */
 export default function TelaInicio() {
   const { usuario, ehCuidador } = useAutenticacao();
-  const { idIdoso, definindo } = useIdosoSelecionado();
+  const { idIdoso, definindo, erroAoCarregar, tentarNovamente } = useIdosoSelecionado();
   const hoje = hojeApi();
   const resumo = useResumoIdoso(idIdoso, hoje);
 
@@ -53,6 +53,18 @@ export default function TelaInicio() {
       <Tela bordas={['top']}>
         {saudacao}
         <Carregando mensagem="Preparando o resumo do dia..." />
+      </Tela>
+    );
+  }
+
+  if (idIdoso === undefined && erroAoCarregar) {
+    return (
+      <Tela bordas={['top']}>
+        {saudacao}
+        <MensagemErro
+          mensagem={extrairMensagemErro(erroAoCarregar)}
+          aoTentarNovamente={tentarNovamente}
+        />
       </Tela>
     );
   }

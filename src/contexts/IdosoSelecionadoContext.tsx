@@ -11,6 +11,9 @@ interface IdosoSelecionadoContextType {
   selecionarIdoso: (id: number) => void;
   /** Ainda decidindo qual idoso mostrar (lista carregando). */
   definindo: boolean;
+  /** Falha ao buscar a lista de idosos do cuidador (ex.: API fora do ar). */
+  erroAoCarregar: unknown;
+  tentarNovamente: () => void;
 }
 
 const IdosoSelecionadoContext = createContext<IdosoSelecionadoContextType | undefined>(undefined);
@@ -49,7 +52,15 @@ export function IdosoSelecionadoProvider({ children }: { children: ReactNode }) 
   const definindo = ehCuidador && (!lidoDoAparelho || listaIdosos.isLoading);
 
   return (
-    <IdosoSelecionadoContext.Provider value={{ idIdoso, selecionarIdoso, definindo }}>
+    <IdosoSelecionadoContext.Provider
+      value={{
+        idIdoso,
+        selecionarIdoso,
+        definindo,
+        erroAoCarregar: ehCuidador ? listaIdosos.error : null,
+        tentarNovamente: () => void listaIdosos.refetch(),
+      }}
+    >
       {children}
     </IdosoSelecionadoContext.Provider>
   );

@@ -89,6 +89,13 @@ export default function TelaPerfil() {
         )
       )}
 
+      <ItemMenu
+        icone="information-circle-outline"
+        titulo="Sobre o App"
+        descricao="Versão, commit de referência e ODS"
+        aoPressionar={() => router.push('/sobre')}
+      />
+
       <Botao
         titulo="Sair da conta"
         icone="log-out-outline"

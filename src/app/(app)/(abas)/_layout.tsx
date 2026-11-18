@@ -41,6 +41,10 @@ export default function LayoutAbas() {
         name="consultas"
         options={{ title: 'Consultas', tabBarIcon: iconeDaAba('calendar') }}
       />
+      <Tabs.Screen
+        name="atividades"
+        options={{ title: 'Atividades', tabBarIcon: iconeDaAba('walk') }}
+      />
       <Tabs.Screen name="perfil" options={{ title: 'Perfil', tabBarIcon: iconeDaAba('person') }} />
     </Tabs>
   );

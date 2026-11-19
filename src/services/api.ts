@@ -4,10 +4,11 @@ import { ErroRespostaApi } from '@/types/erro';
 /**
  * Endereços das APIs (definidos no .env, veja .env.example).
  * - EXPO_PUBLIC_API_URL: API de funções (Java/Spring) — idosos, medicamentos, consultas, atividades.
- * - EXPO_PUBLIC_AUTH_URL: API de autenticação, que emite o JWT. Se não for definida, usa a mesma da API de funções.
+ * - EXPO_PUBLIC_AUTH_URL: API de autenticação (Java/Spring), que emite o JWT.
+ * Sem .env, usa as portas padrão das APIs no localhost do PC visto pelo emulador Android (10.0.2.2).
  */
 export const URL_API = process.env.EXPO_PUBLIC_API_URL ?? 'http://10.0.2.2:8080';
-export const URL_AUTENTICACAO = process.env.EXPO_PUBLIC_AUTH_URL ?? URL_API;
+export const URL_AUTENTICACAO = process.env.EXPO_PUBLIC_AUTH_URL ?? 'http://10.0.2.2:8081';
 
 const TEMPO_LIMITE_MS = 15000;
 
@@ -41,7 +42,7 @@ function criarCliente(baseURL: string): AxiosInstance {
   cliente.interceptors.response.use(
     (resposta) => resposta,
     (erro: AxiosError) => {
-      const rotaDeAutenticacao = erro.config?.url?.startsWith('/auth');
+      const rotaDeAutenticacao = erro.config?.url?.startsWith('/autenticacao');
       if (erro.response?.status === 401 && !rotaDeAutenticacao && aoSessaoExpirar) {
         aoSessaoExpirar();
       }

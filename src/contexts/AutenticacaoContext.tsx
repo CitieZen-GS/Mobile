@@ -1,5 +1,13 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from 'react';
+import {
+  createContext,
+  ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { definirToken, registrarAoSessaoExpirar } from '@/services/api';
 import { autenticacaoService } from '@/services/autenticacaoService';
 import { DadosCadastro, DadosLogin, Sessao, Usuario } from '@/types/autenticacao';
@@ -21,14 +29,17 @@ export function AutenticacaoProvider({ children }: { children: ReactNode }) {
   const clienteQuery = useQueryClient();
   const [sessao, setSessao] = useState<Sessao | null>(null);
   const [carregandoSessao, setCarregandoSessao] = useState(true);
+  // Referência sempre atualizada da sessão, usada no logout (revogar o token de atualização)
+  const sessaoRef = useRef<Sessao | null>(null);
 
   const aplicarSessao = useCallback((nova: Sessao | null) => {
-    definirToken(nova?.token ?? null);
+    definirToken(nova?.tokenAcesso ?? null);
+    sessaoRef.current = nova;
     setSessao(nova);
   }, []);
 
   const sair = useCallback(async () => {
-    await autenticacaoService.sair();
+    await autenticacaoService.sair(sessaoRef.current?.tokenAtualizacao);
     aplicarSessao(null);
     // Limpa os dados em cache do usuário anterior
     clienteQuery.clear();
@@ -71,7 +82,7 @@ export function AutenticacaoProvider({ children }: { children: ReactNode }) {
         usuario,
         logado: Boolean(sessao),
         carregandoSessao,
-        ehCuidador: usuario?.perfil === 'CUIDADOR',
+        ehCuidador: usuario?.tipo === 'CUIDADOR',
         entrar,
         cadastrar,
         sair,

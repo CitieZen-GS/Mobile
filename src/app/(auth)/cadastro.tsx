@@ -3,7 +3,7 @@ import { CabecalhoMarca } from '@/components/autenticacao/CabecalhoMarca';
 import { Aviso, Botao, CampoTexto, Opcao, SeletorOpcoes, Tela, Texto } from '@/components/comuns';
 import { useAutenticacao } from '@/contexts/AutenticacaoContext';
 import { extrairMensagemErro } from '@/services/api';
-import { PerfilUsuario } from '@/types/autenticacao';
+import { TipoUsuario } from '@/types/autenticacao';
 import { mascararCpf, mascararTelefone, textoOpcional } from '@/utils/formatadores';
 import { cpfFormatoValido, emailValido, ErrosFormulario, semErros } from '@/utils/validacoes';
 
@@ -12,13 +12,13 @@ interface FormularioCadastro {
   email: string;
   senha: string;
   confirmacaoSenha: string;
-  perfil: PerfilUsuario;
+  tipo: TipoUsuario;
   cpf: string;
   telefone: string;
   codigoIdoso: string;
 }
 
-const OPCOES_PERFIL: Opcao<PerfilUsuario>[] = [
+const OPCOES_TIPO: Opcao<TipoUsuario>[] = [
   { valor: 'CUIDADOR', rotulo: 'Sou cuidador(a)' },
   { valor: 'FAMILIAR', rotulo: 'Sou familiar' },
 ];
@@ -26,7 +26,7 @@ const OPCOES_PERFIL: Opcao<PerfilUsuario>[] = [
 const TAMANHO_MINIMO_SENHA = 6;
 
 function validar(f: FormularioCadastro): ErrosFormulario<FormularioCadastro> {
-  const ehFamiliar = f.perfil === 'FAMILIAR';
+  const ehFamiliar = f.tipo === 'FAMILIAR';
   return {
     nome: !f.nome.trim() ? 'Informe seu nome.' : undefined,
     email: !f.email.trim()
@@ -58,7 +58,7 @@ export default function TelaCadastro() {
     email: '',
     senha: '',
     confirmacaoSenha: '',
-    perfil: 'CUIDADOR',
+    tipo: 'CUIDADOR',
     cpf: '',
     telefone: '',
     codigoIdoso: '',
@@ -66,7 +66,7 @@ export default function TelaCadastro() {
   const [erros, setErros] = useState<ErrosFormulario<FormularioCadastro>>({});
   const [erroApi, setErroApi] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
-  const ehFamiliar = form.perfil === 'FAMILIAR';
+  const ehFamiliar = form.tipo === 'FAMILIAR';
 
   const alterar = <K extends keyof FormularioCadastro>(campo: K, valor: FormularioCadastro[K]) => {
     setForm((atual) => ({ ...atual, [campo]: valor }));
@@ -85,7 +85,7 @@ export default function TelaCadastro() {
         nome: form.nome.trim(),
         email: form.email.trim().toLowerCase(),
         senha: form.senha,
-        perfil: form.perfil,
+        tipo: form.tipo,
         cpf: ehFamiliar ? undefined : textoOpcional(form.cpf),
         telefone: ehFamiliar ? form.telefone : undefined,
         idIdoso: ehFamiliar ? Number(form.codigoIdoso) : undefined,
@@ -105,9 +105,9 @@ export default function TelaCadastro() {
 
       <SeletorOpcoes
         rotulo="Como você vai usar o app?"
-        opcoes={OPCOES_PERFIL}
-        valor={form.perfil}
-        aoMudar={(perfil) => alterar('perfil', perfil)}
+        opcoes={OPCOES_TIPO}
+        valor={form.tipo}
+        aoMudar={(tipo) => alterar('tipo', tipo)}
       />
       <Texto variante="legenda" cor="textoSecundario">
         {ehFamiliar

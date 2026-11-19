@@ -42,7 +42,7 @@ export function IdosoSelecionadoProvider({ children }: { children: ReactNode }) 
 
   let idIdoso: number | undefined;
   if (!ehCuidador) {
-    idIdoso = usuario?.idIdoso;
+    idIdoso = usuario?.idIdoso ?? undefined;
   } else {
     const idosos = listaIdosos.data ?? [];
     // Mantém a escolha salva se o idoso ainda existe; senão, usa o primeiro da lista

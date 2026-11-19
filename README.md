@@ -107,7 +107,7 @@ flowchart LR
   T[Telas<br/>src/app] --> H[Hooks<br/>React Query]
   H --> S[Services]
   S --> A[Cliente Axios<br/>JWT + tratamento de erros]
-  A -->|/auth/login<br/>/auth/cadastro| AUTH[API de autenticação]
+  A -->|/autenticacao/login<br/>/autenticacao/sair| AUTH[API de autenticação<br/>porta 8081]
   A -->|/idosos, /medicamentos,<br/>/lembretes-consulta, /atividades| API[API de funções<br/>Java / Spring]
   C[AutenticacaoContext] --> SS[(SecureStore<br/>token)]
   C --> A
@@ -115,10 +115,10 @@ flowchart LR
 
 ### Fluxo de autenticação
 
-1. Login ou cadastro chama a API de autenticação, que devolve o JWT.
+1. Login ou cadastro chama a API de autenticação, que devolve o JWT (`tokenAcesso`) e o `tokenAtualizacao`.
 2. O token é salvo no **SecureStore** e enviado em `Authorization: Bearer` por um interceptor do Axios.
 3. O layout raiz usa `Stack.Protected`: sem sessão só existem as telas `(auth)`; com sessão, só as `(app)`.
-4. **Logout** apaga o token e o cache, e o guard leva automaticamente ao login.
+4. **Logout** revoga o token de atualização na API (`/autenticacao/sair`), apaga a sessão e o cache, e o guard leva automaticamente ao login.
 5. Se a API responder **401** (token expirado), a sessão é encerrada do mesmo jeito.
 
 ### Tratamento de erros e feedback visual
@@ -146,21 +146,37 @@ flowchart LR
 | Consultas    | `GET/POST /idosos/{id}/lembretes-consulta?status=` · `GET/PUT/DELETE /lembretes-consulta/{id}` · `PATCH /lembretes-consulta/{id}/status` · `POST/DELETE /lembretes-consulta/{id}/medicamentos/{idMedicamento}` |
 | Atividades   | `GET/POST /idosos/{id}/atividades?data=` · `GET/PUT/DELETE /atividades/{id}`                                                                                                                                   |
 
-**API de autenticação** (contrato esperado pelo app):
+**API de autenticação** ([API-autentificador](https://github.com/CitieZen-GS/API-autentificador), porta 8081):
+
+| Endpoint                      | Uso no app                                                                                                   |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `POST /autenticacao/login`    | Tela de login. Cuidador recebe `tipo: CUIDADOR`; parente recebe `tipo: FAMILIAR` e o `idIdoso` que acompanha |
+| `POST /autenticacao/sair`     | Logout: revoga o token de atualização antes de apagar a sessão do aparelho                                   |
+| `POST /autenticacao/cadastro` | Tela de cadastro. **Ainda não existe na API**; contrato abaixo                                               |
 
 ```http
-POST /auth/cadastro
-{ "nome": "Ana", "email": "ana@email.com", "senha": "123456", "perfil": "CUIDADOR", "cpf": "123.456.789-00" }
-{ "nome": "João", "email": "joao@email.com", "senha": "123456", "perfil": "FAMILIAR", "telefone": "(11) 98765-4321", "idIdoso": 3 }
-
-POST /auth/login
+POST /autenticacao/login
 { "email": "ana@email.com", "senha": "123456" }
 
-Resposta (200/201):
-{ "token": "<jwt>", "usuario": { "id": 1, "nome": "Ana", "email": "ana@email.com", "perfil": "CUIDADOR", "idIdoso": null } }
+200 OK
+{
+  "tokenAcesso": "<jwt>",
+  "tipoToken": "Bearer",
+  "expiraEm": 3600,
+  "tokenAtualizacao": "<token opaco>",
+  "usuario": { "id": 1, "nome": "Ana", "email": "ana@email.com", "tipo": "CUIDADOR", "permissoes": ["LEITURA", "ESCRITA"], "idIdoso": null }
+}
 ```
 
-O JWT é HS256, com o mesmo segredo da API de funções e as claims `sub` (id do usuário) e `roles` (`["CUIDADOR"]` ou `["FAMILIAR"]`). Se a resposta não trouxer o objeto `usuario`, o app lê os dados das claims do token (`sub`, `roles`, `nome`, `email`, `idIdoso`).
+Contrato que o app usa no cadastro (mesma `TokenResposta` do login, com status 201):
+
+```http
+POST /autenticacao/cadastro
+{ "nome": "Ana", "email": "ana@email.com", "senha": "123456", "tipo": "CUIDADOR", "cpf": "123.456.789-00" }
+{ "nome": "João", "email": "joao@email.com", "senha": "123456", "tipo": "FAMILIAR", "telefone": "(11) 98765-4321", "idIdoso": 3 }
+```
+
+O `tokenAcesso` é um JWT HS256 assinado com o mesmo segredo da API de funções (claim `roles`: `CUIDADOR` ou `FAMILIAR`). O app o envia em `Authorization: Bearer` e guarda a sessão no SecureStore.
 
 ## Como executar
 
@@ -180,7 +196,7 @@ npx expo start            # leia o QR code com o Expo Go
 | `npm run typecheck` | TypeScript (`tsc --noEmit`)             |
 | `npm run format`    | Prettier                                |
 
-> No emulador Android, `localhost` do computador é `10.0.2.2`, que é o valor padrão quando `EXPO_PUBLIC_API_URL` não está definida.
+> Sem `.env`, o app usa `http://10.0.2.2:8080` (funções) e `http://10.0.2.2:8081` (autenticação): no emulador Android, `10.0.2.2` é o `localhost` do computador. No celular físico, use o IP do PC na rede (ex.: `http://192.168.0.10:8080`).
 
 ## Publicação (Firebase App Distribution)
 

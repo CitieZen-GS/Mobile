@@ -5,12 +5,16 @@ import { ErroRespostaApi } from '@/types/erro';
  * Endereços das APIs (definidos no .env, veja .env.example).
  * - EXPO_PUBLIC_API_URL: API de funções (Java/Spring) — idosos, medicamentos, consultas, atividades.
  * - EXPO_PUBLIC_AUTH_URL: API de autenticação (Java/Spring), que emite o JWT.
+ * - EXPO_PUBLIC_RAG_URL: API de RAG (Java/Spring + IA) — chat e relatórios do idoso.
  * Sem .env, usa as portas padrão das APIs no localhost do PC visto pelo emulador Android (10.0.2.2).
  */
 export const URL_API = process.env.EXPO_PUBLIC_API_URL ?? 'http://10.0.2.2:8080';
 export const URL_AUTENTICACAO = process.env.EXPO_PUBLIC_AUTH_URL ?? 'http://10.0.2.2:8081';
+export const URL_RAG = process.env.EXPO_PUBLIC_RAG_URL ?? 'http://10.0.2.2:8082';
 
 const TEMPO_LIMITE_MS = 15000;
+/** A resposta do chat passa pela IA e pode levar alguns segundos a mais. */
+const TEMPO_LIMITE_IA_MS = 60000;
 
 let tokenAtual: string | null = null;
 let aoSessaoExpirar: (() => void) | null = null;
@@ -25,10 +29,10 @@ export function registrarAoSessaoExpirar(callback: (() => void) | null) {
   aoSessaoExpirar = callback;
 }
 
-function criarCliente(baseURL: string): AxiosInstance {
+function criarCliente(baseURL: string, tempoLimite = TEMPO_LIMITE_MS): AxiosInstance {
   const cliente = create({
     baseURL,
-    timeout: TEMPO_LIMITE_MS,
+    timeout: tempoLimite,
     headers: { 'Content-Type': 'application/json' },
   });
 
@@ -58,6 +62,9 @@ export const api = criarCliente(URL_API);
 
 /** Cliente da API de autenticação. */
 export const apiAutenticacao = criarCliente(URL_AUTENTICACAO);
+
+/** Cliente da API de RAG (chat e relatórios com IA). Só atende o cuidador. */
+export const apiRag = criarCliente(URL_RAG, TEMPO_LIMITE_IA_MS);
 
 /**
  * Converte qualquer erro de requisição em uma mensagem clara para o usuário.
@@ -94,6 +101,11 @@ export function extrairMensagemErro(erro: unknown): string {
       return data?.mensagem ?? 'Este registro já existe ou está em uso.';
     case 429:
       return 'Muitas tentativas seguidas. Aguarde um pouco e tente de novo.';
+    case 503:
+      // API de RAG: a IA não respondeu (nada foi gravado)
+      return (
+        data?.mensagem ?? 'O serviço está indisponível no momento. Tente novamente em instantes.'
+      );
     default:
       if (status >= 500) {
         return 'O servidor está com problemas no momento. Tente novamente em instantes.';

@@ -5,6 +5,7 @@ import {
   Botao,
   Carregando,
   EstadoVazio,
+  ItemMenu,
   MensagemErro,
   Selo,
   Tela,
@@ -127,6 +128,15 @@ export default function TelaInicio() {
             <Selo key={doenca.id} texto={doenca.nome} tom="destaque" />
           ))}
         </View>
+      )}
+
+      {ehCuidador && (
+        <ItemMenu
+          icone="chatbubbles-outline"
+          titulo="Perguntar ao assistente"
+          descricao={`Tire dúvidas sobre a rotina de ${idoso.nome} com a IA`}
+          aoPressionar={() => router.push('/assistente')}
+        />
       )}
 
       <SecaoResumo

@@ -2,7 +2,7 @@ import Constants from 'expo-constants';
 import { StyleSheet, View } from 'react-native';
 import { Cartao, Icone, NomeIcone, Selo, Tela, Texto } from '@/components/comuns';
 import { useTema } from '@/contexts/TemaContext';
-import { URL_API } from '@/services/api';
+import { URL_API, URL_RAG } from '@/services/api';
 import { espacos } from '@/styles/tema';
 
 const configuracao = Constants.expoConfig;
@@ -51,6 +51,7 @@ export default function TelaSobre() {
         <LinhaInfo icone="git-commit-outline" rotulo="Hash do commit" valor={HASH_DO_COMMIT} />
         <LinhaInfo icone="pricetag-outline" rotulo="Versão" valor={VERSAO} />
         <LinhaInfo icone="server-outline" rotulo="API" valor={URL_API} />
+        <LinhaInfo icone="sparkles-outline" rotulo="Assistente (RAG)" valor={URL_RAG} />
       </Cartao>
 
       <Cartao>

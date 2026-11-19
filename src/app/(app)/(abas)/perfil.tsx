@@ -1,36 +1,11 @@
 import { router } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
-import { Botao, Cartao, Icone, NomeIcone, Selo, Tela, Texto } from '@/components/comuns';
+import { Botao, Cartao, ItemMenu, Selo, Tela, Texto } from '@/components/comuns';
 import { useAutenticacao } from '@/contexts/AutenticacaoContext';
 import { useIdosoSelecionado } from '@/contexts/IdosoSelecionadoContext';
 import { useTema } from '@/contexts/TemaContext';
 import { espacos } from '@/styles/tema';
 import { confirmar } from '@/utils/confirmacao';
-
-interface ItemMenuProps {
-  icone: NomeIcone;
-  titulo: string;
-  descricao: string;
-  aoPressionar: () => void;
-}
-
-function ItemMenu({ icone, titulo, descricao, aoPressionar }: ItemMenuProps) {
-  const { cores } = useTema();
-  return (
-    <Cartao aoPressionar={aoPressionar} rotuloAcessivel={titulo}>
-      <View style={estilos.linha}>
-        <Icone nome={icone} cor={cores.primaria} tamanho={26} />
-        <View style={estilos.textos}>
-          <Texto variante="corpoNegrito">{titulo}</Texto>
-          <Texto variante="legenda" cor="textoSecundario">
-            {descricao}
-          </Texto>
-        </View>
-        <Icone nome="chevron-forward" cor={cores.textoSuave} />
-      </View>
-    </Cartao>
-  );
-}
 
 export default function TelaPerfil() {
   const { cores } = useTema();
@@ -70,12 +45,26 @@ export default function TelaPerfil() {
       </Cartao>
 
       {ehCuidador ? (
-        <ItemMenu
-          icone="people-outline"
-          titulo="Meus idosos"
-          descricao="Cadastre, edite ou escolha quem acompanhar"
-          aoPressionar={() => router.push('/idosos')}
-        />
+        <>
+          <ItemMenu
+            icone="people-outline"
+            titulo="Meus idosos"
+            descricao="Cadastre, edite ou escolha quem acompanhar"
+            aoPressionar={() => router.push('/idosos')}
+          />
+          <ItemMenu
+            icone="chatbubbles-outline"
+            titulo="Assistente com IA"
+            descricao="Pergunte sobre a rotina registrada"
+            aoPressionar={() => router.push('/assistente')}
+          />
+          <ItemMenu
+            icone="document-text-outline"
+            titulo="Relatórios"
+            descricao="Resumos do período para a consulta ou a família"
+            aoPressionar={() => router.push('/relatorios')}
+          />
+        </>
       ) : (
         idIdoso !== undefined && (
           <ItemMenu

@@ -19,12 +19,42 @@ export function dataTelaParaApi(data: string): string {
   return `${ano}-${mes}-${dia}`;
 }
 
+function paraDataApi(data: Date): string {
+  const mes = String(data.getMonth() + 1).padStart(2, '0');
+  const dia = String(data.getDate()).padStart(2, '0');
+  return `${data.getFullYear()}-${mes}-${dia}`;
+}
+
 /** Data de hoje no formato da API (fuso local). */
 export function hojeApi(): string {
-  const agora = new Date();
-  const mes = String(agora.getMonth() + 1).padStart(2, '0');
-  const dia = String(agora.getDate()).padStart(2, '0');
-  return `${agora.getFullYear()}-${mes}-${dia}`;
+  return paraDataApi(new Date());
+}
+
+/** Data de N dias atrás no formato da API (fuso local). Ex.: diasAtrasApi(6) = início da última semana. */
+export function diasAtrasApi(dias: number): string {
+  const data = new Date();
+  data.setDate(data.getDate() - dias);
+  return paraDataApi(data);
+}
+
+/** "2026-11-19T14:30:12" -> { data: "2026-11-19", hora: "14:30" } */
+export function separarDataHora(dataHora: string): { data: string; hora: string } {
+  const [data, hora = ''] = dataHora.split('T');
+  return { data, hora: hora.slice(0, 5) };
+}
+
+/** "2026-11-19T14:30:12" -> "19/11/2026 às 14:30" */
+export function dataHoraApiParaTela(dataHora?: string | null): string {
+  if (!dataHora) return '';
+  const { data, hora } = separarDataHora(dataHora);
+  return hora ? `${dataApiParaTela(data)} às ${hora}` : dataApiParaTela(data);
+}
+
+/** ("2026-11-01", "2026-11-18") -> "01/11/2026 a 18/11/2026" (ou só a data, se for um único dia) */
+export function periodoParaTela(inicio: string, fim: string): string {
+  return inicio === fim
+    ? dataApiParaTela(inicio)
+    : `${dataApiParaTela(inicio)} a ${dataApiParaTela(fim)}`;
 }
 
 /** "08:30:00" -> "08:30" */

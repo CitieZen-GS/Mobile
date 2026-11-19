@@ -23,6 +23,8 @@ interface TelaListaProps<T> {
   semIdoso?: boolean;
   /** Conteúdo fixo acima da lista (ex.: filtros). */
   acimaDaLista?: ReactNode;
+  /** Tela empilhada (fora das abas): mostra o botão de voltar e protege a borda inferior. */
+  comVoltar?: boolean;
 }
 
 /**
@@ -40,6 +42,7 @@ export function TelaLista<T>({
   rotuloCriar = 'Adicionar',
   semIdoso = false,
   acimaDaLista,
+  comVoltar = false,
 }: TelaListaProps<T>) {
   const { cores } = useTema();
 
@@ -91,7 +94,13 @@ export function TelaLista<T>({
   }
 
   return (
-    <Tela titulo={titulo} subtitulo={subtitulo} rolavel={false} bordas={['top']}>
+    <Tela
+      titulo={titulo}
+      subtitulo={subtitulo}
+      comVoltar={comVoltar}
+      rolavel={false}
+      bordas={comVoltar ? ['top', 'bottom'] : ['top']}
+    >
       {!semIdoso && acimaDaLista}
       {conteudo}
       {aoCriar && !semIdoso && !!consulta.data?.length && (

@@ -31,6 +31,20 @@ export function dataNoFuturo(data: string): boolean {
   return new Date(ano, mes - 1, dia) > hoje;
 }
 
+/**
+ * Dias entre duas datas dd/mm/aaaa, contando as duas pontas (01/11 a 07/11 = 7), como a API de RAG.
+ * Resultado menor que 1 significa que o fim é antes do início.
+ */
+export function diasNoPeriodo(inicio: string, fim: string): number {
+  const [diaInicio, mesInicio, anoInicio] = inicio.split('/').map(Number);
+  const [diaFim, mesFim, anoFim] = fim.split('/').map(Number);
+  const MS_POR_DIA = 24 * 60 * 60 * 1000;
+  // Date.UTC evita diferença de uma hora em datas com horário de verão
+  const diferenca =
+    Date.UTC(anoFim, mesFim - 1, diaFim) - Date.UTC(anoInicio, mesInicio - 1, diaInicio);
+  return Math.round(diferenca / MS_POR_DIA) + 1;
+}
+
 /** Aceita hh:mm entre 00:00 e 23:59. */
 export function horaValida(hora: string): boolean {
   return /^([01]\d|2[0-3]):[0-5]\d$/.test(hora);

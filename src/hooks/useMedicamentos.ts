@@ -1,5 +1,5 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { chavesIdoso } from './useIdosos';
+import { QueryKey, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { ehDoRegistroExcluido, recarregarCache } from './cache';
 import { medicamentoService } from '@/services/medicamentoService';
 import { MedicamentoRequisicao } from '@/types/medicamento';
 
@@ -25,13 +25,14 @@ export function useMedicamento(id?: number) {
   });
 }
 
-/** Após qualquer alteração, atualiza a lista e o resumo do dia na tela inicial. */
+/**
+ * Após qualquer alteração, recarrega a lista, o resumo do dia e as consultas
+ * (que mostram os medicamentos a levar).
+ */
 function useInvalidarMedicamentos() {
   const clienteQuery = useQueryClient();
-  return () => {
-    clienteQuery.invalidateQueries({ queryKey: chavesMedicamento.todos });
-    clienteQuery.invalidateQueries({ queryKey: chavesIdoso.todos });
-  };
+  return (ignorar?: (chave: QueryKey) => boolean) =>
+    recarregarCache(clienteQuery, ['medicamentos', 'idosos', 'consultas'], ignorar);
 }
 
 export function useSalvarMedicamento() {
@@ -46,7 +47,7 @@ export function useSalvarMedicamento() {
       idIdoso: number;
       dados: MedicamentoRequisicao;
     }) => (id ? medicamentoService.atualizar(id, dados) : medicamentoService.criar(idIdoso, dados)),
-    onSuccess: invalidar,
+    onSuccess: () => invalidar(),
   });
 }
 
@@ -54,6 +55,6 @@ export function useRemoverMedicamento() {
   const invalidar = useInvalidarMedicamentos();
   return useMutation({
     mutationFn: (id: number) => medicamentoService.remover(id),
-    onSuccess: invalidar,
+    onSuccess: (_resposta, id) => invalidar(ehDoRegistroExcluido(id)),
   });
 }

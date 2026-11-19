@@ -46,6 +46,9 @@ function NavegacaoRaiz({ fontesProntas }: { fontesProntas: boolean }) {
     <>
       <StatusBar style={escuro ? 'light' : 'dark'} />
       <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: cores.fundo } }}>
+        {/* "/" sempre existe e redireciona conforme a sessão (src/app/index.tsx) */}
+        <Stack.Screen name="index" />
+        <Stack.Screen name="+not-found" />
         <Stack.Protected guard={logado}>
           <Stack.Screen name="(app)" />
         </Stack.Protected>

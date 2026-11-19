@@ -42,9 +42,7 @@ export default function TelaInicio() {
       <Texto variante="titulo" accessibilityRole="header">
         Olá, {usuario?.nome}!
       </Texto>
-      <Texto cor="textoSecundario" style={estilos.data}>
-        {dataPorExtenso(hoje)}
-      </Texto>
+      <Texto cor="textoSecundario">{dataPorExtenso(hoje)}</Texto>
     </View>
   );
 
@@ -213,6 +211,5 @@ export default function TelaInicio() {
 }
 
 const estilos = StyleSheet.create({
-  data: { textTransform: 'capitalize' },
   selos: { flexDirection: 'row', flexWrap: 'wrap', gap: espacos.sm },
 });

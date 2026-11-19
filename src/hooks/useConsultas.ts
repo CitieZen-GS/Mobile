@@ -1,5 +1,5 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { chavesIdoso } from './useIdosos';
+import { QueryKey, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { ehDoRegistroExcluido, recarregarCache } from './cache';
 import { consultaService } from '@/services/consultaService';
 import { LembreteConsultaRequisicao, StatusConsulta } from '@/types/consulta';
 
@@ -26,13 +26,11 @@ export function useConsulta(id?: number) {
   });
 }
 
-/** Após qualquer alteração, atualiza as listas e o resumo do dia. */
+/** Após qualquer alteração, recarrega as listas e o resumo do dia. */
 function useInvalidarConsultas() {
   const clienteQuery = useQueryClient();
-  return () => {
-    clienteQuery.invalidateQueries({ queryKey: chavesConsulta.todos });
-    clienteQuery.invalidateQueries({ queryKey: chavesIdoso.todos });
-  };
+  return (ignorar?: (chave: QueryKey) => boolean) =>
+    recarregarCache(clienteQuery, ['consultas', 'idosos'], ignorar);
 }
 
 export function useSalvarConsulta() {
@@ -47,7 +45,7 @@ export function useSalvarConsulta() {
       idIdoso: number;
       dados: LembreteConsultaRequisicao;
     }) => (id ? consultaService.atualizar(id, dados) : consultaService.criar(idIdoso, dados)),
-    onSuccess: invalidar,
+    onSuccess: () => invalidar(),
   });
 }
 
@@ -56,7 +54,7 @@ export function useAlterarStatusConsulta() {
   return useMutation({
     mutationFn: ({ id, status }: { id: number; status: StatusConsulta }) =>
       consultaService.alterarStatus(id, status),
-    onSuccess: invalidar,
+    onSuccess: () => invalidar(),
   });
 }
 
@@ -64,7 +62,7 @@ export function useRemoverConsulta() {
   const invalidar = useInvalidarConsultas();
   return useMutation({
     mutationFn: (id: number) => consultaService.remover(id),
-    onSuccess: invalidar,
+    onSuccess: (_resposta, id) => invalidar(ehDoRegistroExcluido(id)),
   });
 }
 
@@ -84,6 +82,6 @@ export function useAlternarMedicamentoConsulta() {
       vincular
         ? consultaService.vincularMedicamento(id, idMedicamento)
         : consultaService.desvincularMedicamento(id, idMedicamento),
-    onSuccess: invalidar,
+    onSuccess: () => invalidar(),
   });
 }

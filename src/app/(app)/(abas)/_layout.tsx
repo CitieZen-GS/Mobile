@@ -32,7 +32,7 @@ export default function LayoutAbas() {
         sceneStyle: { backgroundColor: cores.fundo },
       }}
     >
-      <Tabs.Screen name="index" options={{ title: 'Início', tabBarIcon: iconeDaAba('home') }} />
+      <Tabs.Screen name="inicio" options={{ title: 'Início', tabBarIcon: iconeDaAba('home') }} />
       <Tabs.Screen
         name="medicamentos"
         options={{ title: 'Remédios', tabBarIcon: iconeDaAba('medkit') }}

@@ -32,14 +32,15 @@ export function formatarHora(hora?: string | null): string {
   return hora ? hora.slice(0, 5) : '';
 }
 
-/** "17/11/2026" -> "terça-feira, 17 de novembro" */
+/** "2026-11-17" -> "Terça-feira, 17 de novembro" (só a primeira letra maiúscula) */
 export function dataPorExtenso(dataApi: string): string {
   const [ano, mes, dia] = dataApi.split('-').map(Number);
-  return new Date(ano, mes - 1, dia).toLocaleDateString('pt-BR', {
+  const texto = new Date(ano, mes - 1, dia).toLocaleDateString('pt-BR', {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
   });
+  return texto.charAt(0).toUpperCase() + texto.slice(1);
 }
 
 /** Máscara de digitação: "17112026" -> "17/11/2026" */

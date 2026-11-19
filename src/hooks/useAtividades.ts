@@ -1,5 +1,5 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { chavesIdoso } from './useIdosos';
+import { QueryKey, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { ehDoRegistroExcluido, recarregarCache } from './cache';
 import { atividadeService } from '@/services/atividadeService';
 import { AtividadeRequisicao } from '@/types/atividade';
 
@@ -25,13 +25,11 @@ export function useAtividade(id?: number) {
   });
 }
 
-/** Após qualquer alteração, atualiza a lista e o resumo do dia. */
+/** Após qualquer alteração, recarrega a lista e o resumo do dia. */
 function useInvalidarAtividades() {
   const clienteQuery = useQueryClient();
-  return () => {
-    clienteQuery.invalidateQueries({ queryKey: chavesAtividade.todos });
-    clienteQuery.invalidateQueries({ queryKey: chavesIdoso.todos });
-  };
+  return (ignorar?: (chave: QueryKey) => boolean) =>
+    recarregarCache(clienteQuery, ['atividades', 'idosos'], ignorar);
 }
 
 export function useSalvarAtividade() {
@@ -46,7 +44,7 @@ export function useSalvarAtividade() {
       idIdoso: number;
       dados: AtividadeRequisicao;
     }) => (id ? atividadeService.atualizar(id, dados) : atividadeService.criar(idIdoso, dados)),
-    onSuccess: invalidar,
+    onSuccess: () => invalidar(),
   });
 }
 
@@ -54,6 +52,6 @@ export function useRemoverAtividade() {
   const invalidar = useInvalidarAtividades();
   return useMutation({
     mutationFn: (id: number) => atividadeService.remover(id),
-    onSuccess: invalidar,
+    onSuccess: (_resposta, id) => invalidar(ehDoRegistroExcluido(id)),
   });
 }

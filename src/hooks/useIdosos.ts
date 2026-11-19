@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { ehDoRegistroExcluido, recarregarCache } from './cache';
 import { idosoService } from '@/services/idosoService';
 import { IdosoRequisicao } from '@/types/idoso';
 
@@ -39,7 +40,7 @@ export function useSalvarIdoso() {
   return useMutation({
     mutationFn: ({ id, dados }: { id?: number; dados: IdosoRequisicao }) =>
       id ? idosoService.atualizar(id, dados) : idosoService.criar(dados),
-    onSuccess: () => clienteQuery.invalidateQueries({ queryKey: chavesIdoso.todos }),
+    onSuccess: () => recarregarCache(clienteQuery, ['idosos']),
   });
 }
 
@@ -47,6 +48,7 @@ export function useRemoverIdoso() {
   const clienteQuery = useQueryClient();
   return useMutation({
     mutationFn: (id: number) => idosoService.remover(id),
-    onSuccess: () => clienteQuery.invalidateQueries({ queryKey: chavesIdoso.todos }),
+    onSuccess: (_resposta, id) =>
+      recarregarCache(clienteQuery, ['idosos'], ehDoRegistroExcluido(id)),
   });
 }

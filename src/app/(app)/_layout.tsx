@@ -14,10 +14,12 @@ export default function LayoutAplicativo() {
         {/* As abas continuam sendo a primeira tela da pilha */}
         <Stack.Screen name="(abas)" />
         {/*
-          Assistente e relatórios usam a API de RAG, que só atende o cuidador (familiar recebe 403).
-          Para o familiar essas rotas não existem: quem tentar abrir volta para as abas.
+          Só o cuidador: assistente e relatórios (API de RAG, familiar recebe 403) e o cadastro
+          de familiares (POST /autenticacao/cadastro/parente). Para o familiar essas rotas não
+          existem: quem tentar abrir volta para as abas.
         */}
         <Stack.Protected guard={ehCuidador}>
+          <Stack.Screen name="familiar/novo" />
           <Stack.Screen name="assistente" />
           <Stack.Screen name="relatorios/index" />
           <Stack.Screen name="relatorios/novo" />

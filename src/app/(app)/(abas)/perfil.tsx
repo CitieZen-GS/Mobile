@@ -52,6 +52,16 @@ export default function TelaPerfil() {
             descricao="Cadastre, edite ou escolha quem acompanhar"
             aoPressionar={() => router.push('/idosos')}
           />
+          {idIdoso !== undefined && (
+            <ItemMenu
+              icone="person-add-outline"
+              titulo="Cadastrar familiar"
+              descricao="Crie o acesso de quem vai acompanhar o idoso"
+              aoPressionar={() =>
+                router.push({ pathname: '/familiar/novo', params: { idIdoso: String(idIdoso) } })
+              }
+            />
+          )}
           <ItemMenu
             icone="chatbubbles-outline"
             titulo="Assistente com IA"

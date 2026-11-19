@@ -37,19 +37,19 @@ O Brasil tem mais de 32 milhões de pessoas com 60 anos ou mais (IBGE, Censo 202
 
 ## Funcionalidades
 
-| Perfil       | O que pode fazer                                                                                                                                                                                                                                  |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Cuidador** | Cadastrar, editar e excluir idosos, medicamentos, consultas e atividades; marcar consulta como realizada; separar os remédios que devem ir para a consulta; conversar com o assistente de IA sobre a rotina do idoso; gerar relatórios do período |
-| **Familiar** | Ver o resumo do dia, os remédios, as consultas, as atividades e a ficha do idoso (somente leitura)                                                                                                                                                |
+| Perfil       | O que pode fazer                                                                                                                                                                                                                                                                                   |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Cuidador** | Criar a própria conta e o acesso dos familiares; cadastrar, editar e excluir idosos, medicamentos, consultas e atividades; marcar consulta como realizada; separar os remédios que devem ir para a consulta; conversar com o assistente de IA sobre a rotina do idoso; gerar relatórios do período |
+| **Familiar** | Entrar com o acesso criado pelo cuidador e ver o resumo do dia, os remédios, as consultas, as atividades e a ficha do idoso (somente leitura)                                                                                                                                                      |
 
-O controle de acesso é feito pela API (o JWT traz a claim `roles`). O app também esconde os botões de edição para o familiar, e as telas do assistente e dos relatórios ficam numa rota protegida (`Stack.Protected`) que só existe para o cuidador.
+O **cuidador é o dono da conta**: ele se cadastra, cadastra os idosos e cria o acesso de cada familiar a um idoso específico. Não existe cadastro público de familiar. O controle de acesso é feito pela API (o JWT traz a claim `roles`). O app também esconde os botões de edição para o familiar, e as telas do assistente e dos relatórios ficam numa rota protegida (`Stack.Protected`) que só existe para o cuidador.
 
-## Telas (16, além da "Sobre o App")
+## Telas (17, além da "Sobre o App")
 
 | #   | Tela                                               | Rota                  | Requisito      |
 | --- | -------------------------------------------------- | --------------------- | -------------- |
 | 1   | Login                                              | `/login`              | Autenticação   |
-| 2   | Cadastro (cuidador ou familiar)                    | `/cadastro`           | Autenticação   |
+| 2   | Cadastro do cuidador                               | `/cadastro`           | Autenticação   |
 | 3   | Início: resumo do dia                              | `/` (aba)             | CRUD (leitura) |
 | 4   | Remédios: lista                                    | `/medicamentos` (aba) | CRUD           |
 | 5   | Consultas: lista com filtro e status               | `/consultas` (aba)    | CRUD           |
@@ -64,6 +64,7 @@ O controle de acesso é feito pela API (o JWT traz a claim `roles`). O app tamb�
 | 14  | Relatórios: lista com situação da geração          | `/relatorios`         | API de RAG     |
 | 15  | Novo relatório (assunto, período e pedido à IA)    | `/relatorios/novo`    | API de RAG     |
 | 16  | Relatório (leitura e exclusão)                     | `/relatorios/[id]`    | API de RAG     |
+| 17  | Cadastrar familiar (acesso a um idoso, cuidador)   | `/familiar/novo`      | Autenticação   |
 | –   | Sobre o App (hash do commit)                       | `/sobre`              | Publicação     |
 
 ## Tecnologias e justificativas
@@ -157,11 +158,12 @@ flowchart LR
 
 **API de autenticação** ([API-autentificador](https://github.com/CitieZen-GS/API-autentificador), porta 8081):
 
-| Endpoint                      | Uso no app                                                                                                   |
-| ----------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `POST /autenticacao/login`    | Tela de login. Cuidador recebe `tipo: CUIDADOR`; parente recebe `tipo: FAMILIAR` e o `idIdoso` que acompanha |
-| `POST /autenticacao/sair`     | Logout: revoga o token de atualização antes de apagar a sessão do aparelho                                   |
-| `POST /autenticacao/cadastro` | Tela de cadastro. **Ainda não existe na API**; contrato abaixo                                               |
+| Endpoint                               | Uso no app                                                                                                                                 |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `POST /autenticacao/login`             | Tela de login. Cuidador recebe `tipo: CUIDADOR`; parente recebe `tipo: FAMILIAR` e o `idIdoso` que acompanha                               |
+| `POST /autenticacao/sair`              | Logout: revoga o token de atualização antes de apagar a sessão do aparelho                                                                 |
+| `POST /autenticacao/cadastro/cuidador` | Tela de cadastro (pública). Devolve a mesma `TokenResposta` do login, então o cuidador já entra logado                                     |
+| `POST /autenticacao/cadastro/parente`  | Tela "Cadastrar familiar" (só cuidador logado, para um idoso dele). Devolve o `UsuarioResposta` do familiar; a sessão do cuidador não muda |
 
 ```http
 POST /autenticacao/login
@@ -177,12 +179,12 @@ POST /autenticacao/login
 }
 ```
 
-Contrato que o app usa no cadastro (mesma `TokenResposta` do login, com status 201):
-
 ```http
-POST /autenticacao/cadastro
-{ "nome": "Ana", "email": "ana@email.com", "senha": "123456", "tipo": "CUIDADOR", "cpf": "123.456.789-00" }
-{ "nome": "João", "email": "joao@email.com", "senha": "123456", "tipo": "FAMILIAR", "telefone": "(11) 98765-4321", "idIdoso": 3 }
+POST /autenticacao/cadastro/cuidador          (pública, 201 + TokenResposta)
+{ "nome": "Ana", "cpf": "123.456.789-00", "email": "ana@email.com", "senha": "123456" }
+
+POST /autenticacao/cadastro/parente            (Bearer do cuidador, 201 + UsuarioResposta)
+{ "nome": "João", "telefone": "(11) 98765-4321", "email": "joao@email.com", "senha": "123456", "idIdoso": 3 }
 ```
 
 O `tokenAcesso` é um JWT HS256 assinado com o mesmo segredo da API de funções (claim `roles`: `CUIDADOR` ou `FAMILIAR`). O app o envia em `Authorization: Bearer` e guarda a sessão no SecureStore.

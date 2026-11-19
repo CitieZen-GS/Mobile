@@ -20,18 +20,31 @@ export interface DadosLogin {
   senha: string;
 }
 
-/** Cadastro de cuidador ou familiar (POST /autenticacao/cadastro). */
-export interface DadosCadastro {
+/**
+ * CadastroCuidadorRequisicao (POST /autenticacao/cadastro/cuidador, rota pública).
+ * O cuidador é o dono da conta: depois cadastra os idosos e os familiares.
+ */
+export interface DadosCadastroCuidador {
   nome: string;
+  /** Opcional: 000.000.000-00 */
+  cpf?: string;
+  email: string;
+  /** De 6 a 72 caracteres. */
+  senha: string;
+}
+
+/**
+ * CadastroParenteRequisicao (POST /autenticacao/cadastro/parente, só cuidador logado).
+ * O familiar depois entra pelo login com este e-mail e senha.
+ */
+export interface DadosCadastroFamiliar {
+  nome: string;
+  /** Opcional */
+  telefone?: string;
   email: string;
   senha: string;
-  tipo: TipoUsuario;
-  /** Cuidador */
-  cpf?: string;
-  /** Familiar */
-  telefone?: string;
-  /** Familiar: código do idoso que ele acompanha (informado pelo cuidador). */
-  idIdoso?: number;
+  /** Idoso do cuidador logado que o familiar vai acompanhar. */
+  idIdoso: number;
 }
 
 /** TokenResposta (login, cadastro e /autenticacao/atualizar). */

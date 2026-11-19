@@ -182,6 +182,16 @@ export default function TelaFichaIdoso() {
         />
       )}
       {!ehNovo && idNumerico === idIdoso && <Selo texto="Acompanhando agora" tom="sucesso" />}
+      {!ehNovo && ehCuidador && (
+        <Botao
+          titulo="Cadastrar familiar"
+          icone="person-add-outline"
+          variante="fantasma"
+          aoPressionar={() =>
+            router.push({ pathname: '/familiar/novo', params: { idIdoso: String(idNumerico) } })
+          }
+        />
+      )}
 
       <CampoTexto
         rotulo="Nome"

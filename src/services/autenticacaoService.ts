@@ -1,6 +1,13 @@
 import { apiAutenticacao } from './api';
 import { armazenamento } from './armazenamento';
-import { DadosCadastro, DadosLogin, RespostaToken, Sessao } from '@/types/autenticacao';
+import {
+  DadosCadastroCuidador,
+  DadosCadastroFamiliar,
+  DadosLogin,
+  RespostaToken,
+  Sessao,
+  Usuario,
+} from '@/types/autenticacao';
 
 const CHAVE_SESSAO = 'ajudante_familiar_sessao';
 
@@ -38,13 +45,22 @@ export const autenticacaoService = {
     return salvarSessao(data);
   },
 
-  /**
-   * POST /autenticacao/cadastro — cria a conta e já devolve os tokens (o usuário entra direto).
-   * Endpoint combinado com a equipe do backend; contrato no README.
-   */
-  async cadastrar(dados: DadosCadastro): Promise<Sessao> {
-    const { data } = await apiAutenticacao.post<RespostaToken>('/autenticacao/cadastro', dados);
+  /** POST /autenticacao/cadastro/cuidador — cria a conta e já devolve os tokens (entra direto). */
+  async cadastrarCuidador(dados: DadosCadastroCuidador): Promise<Sessao> {
+    const { data } = await apiAutenticacao.post<RespostaToken>(
+      '/autenticacao/cadastro/cuidador',
+      dados,
+    );
     return salvarSessao(data);
+  },
+
+  /**
+   * POST /autenticacao/cadastro/parente — o cuidador logado cria o acesso de um familiar
+   * para um idoso dele. Não muda a sessão atual: o familiar entra depois pelo login.
+   */
+  async cadastrarFamiliar(dados: DadosCadastroFamiliar): Promise<Usuario> {
+    const { data } = await apiAutenticacao.post<Usuario>('/autenticacao/cadastro/parente', dados);
+    return data;
   },
 
   /** Recupera a sessão salva no aparelho, descartando tokens expirados. */

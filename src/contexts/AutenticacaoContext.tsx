@@ -10,7 +10,7 @@ import {
 } from 'react';
 import { definirToken, registrarAoSessaoExpirar } from '@/services/api';
 import { autenticacaoService } from '@/services/autenticacaoService';
-import { DadosCadastro, DadosLogin, Sessao, Usuario } from '@/types/autenticacao';
+import { DadosCadastroCuidador, DadosLogin, Sessao, Usuario } from '@/types/autenticacao';
 
 interface AutenticacaoContextType {
   usuario: Usuario | null;
@@ -19,7 +19,7 @@ interface AutenticacaoContextType {
   carregandoSessao: boolean;
   ehCuidador: boolean;
   entrar: (dados: DadosLogin) => Promise<void>;
-  cadastrar: (dados: DadosCadastro) => Promise<void>;
+  cadastrar: (dados: DadosCadastroCuidador) => Promise<void>;
   sair: () => Promise<void>;
 }
 
@@ -68,8 +68,8 @@ export function AutenticacaoProvider({ children }: { children: ReactNode }) {
   );
 
   const cadastrar = useCallback(
-    async (dados: DadosCadastro) => {
-      aplicarSessao(await autenticacaoService.cadastrar(dados));
+    async (dados: DadosCadastroCuidador) => {
+      aplicarSessao(await autenticacaoService.cadastrarCuidador(dados));
     },
     [aplicarSessao],
   );

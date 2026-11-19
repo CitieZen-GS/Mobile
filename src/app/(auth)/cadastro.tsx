@@ -1,34 +1,27 @@
 import { useState } from 'react';
 import { CabecalhoMarca } from '@/components/autenticacao/CabecalhoMarca';
-import { Aviso, Botao, CampoTexto, Opcao, SeletorOpcoes, Tela, Texto } from '@/components/comuns';
+import { Aviso, Botao, CampoTexto, Tela, Texto } from '@/components/comuns';
 import { useAutenticacao } from '@/contexts/AutenticacaoContext';
+import { useFormulario } from '@/hooks/useFormulario';
 import { extrairMensagemErro } from '@/services/api';
-import { TipoUsuario } from '@/types/autenticacao';
-import { mascararCpf, mascararTelefone, textoOpcional } from '@/utils/formatadores';
-import { cpfFormatoValido, emailValido, ErrosFormulario, semErros } from '@/utils/validacoes';
+import { mascararCpf, textoOpcional } from '@/utils/formatadores';
+import { cpfFormatoValido, emailValido, ErrosFormulario } from '@/utils/validacoes';
 
 interface FormularioCadastro {
   nome: string;
+  cpf: string;
   email: string;
   senha: string;
   confirmacaoSenha: string;
-  tipo: TipoUsuario;
-  cpf: string;
-  telefone: string;
-  codigoIdoso: string;
 }
-
-const OPCOES_TIPO: Opcao<TipoUsuario>[] = [
-  { valor: 'CUIDADOR', rotulo: 'Sou cuidador(a)' },
-  { valor: 'FAMILIAR', rotulo: 'Sou familiar' },
-];
 
 const TAMANHO_MINIMO_SENHA = 6;
 
-function validar(f: FormularioCadastro): ErrosFormulario<FormularioCadastro> {
-  const ehFamiliar = f.tipo === 'FAMILIAR';
+/** Mesmas regras do CadastroCuidadorRequisicao da API de autenticação. */
+function regras(f: FormularioCadastro): ErrosFormulario<FormularioCadastro> {
   return {
     nome: !f.nome.trim() ? 'Informe seu nome.' : undefined,
+    cpf: f.cpf && !cpfFormatoValido(f.cpf) ? 'CPF incompleto.' : undefined,
     email: !f.email.trim()
       ? 'Informe seu e-mail.'
       : !emailValido(f.email)
@@ -39,88 +32,59 @@ function validar(f: FormularioCadastro): ErrosFormulario<FormularioCadastro> {
         ? `A senha precisa ter pelo menos ${TAMANHO_MINIMO_SENHA} caracteres.`
         : undefined,
     confirmacaoSenha: f.confirmacaoSenha !== f.senha ? 'As senhas não conferem.' : undefined,
-    cpf: !ehFamiliar && f.cpf && !cpfFormatoValido(f.cpf) ? 'CPF incompleto.' : undefined,
-    telefone:
-      ehFamiliar && f.telefone.replace(/\D/g, '').length < 10
-        ? 'Informe um telefone com DDD.'
-        : undefined,
-    codigoIdoso:
-      ehFamiliar && !/^\d+$/.test(f.codigoIdoso)
-        ? 'Informe o código do idoso (peça ao cuidador).'
-        : undefined,
   };
 }
 
+/**
+ * Criação de conta do cuidador (POST /autenticacao/cadastro/cuidador).
+ * O cuidador é o dono da conta: depois cadastra os idosos e cria o acesso dos familiares.
+ */
 export default function TelaCadastro() {
   const { cadastrar } = useAutenticacao();
-  const [form, setForm] = useState<FormularioCadastro>({
-    nome: '',
-    email: '',
-    senha: '',
-    confirmacaoSenha: '',
-    tipo: 'CUIDADOR',
-    cpf: '',
-    telefone: '',
-    codigoIdoso: '',
-  });
-  const [erros, setErros] = useState<ErrosFormulario<FormularioCadastro>>({});
-  const [erroApi, setErroApi] = useState<string | null>(null);
+  const { valores, erros, alterar, validar, erroApi, setErroApi } =
+    useFormulario<FormularioCadastro>({
+      nome: '',
+      cpf: '',
+      email: '',
+      senha: '',
+      confirmacaoSenha: '',
+    });
   const [enviando, setEnviando] = useState(false);
-  const ehFamiliar = form.tipo === 'FAMILIAR';
-
-  const alterar = <K extends keyof FormularioCadastro>(campo: K, valor: FormularioCadastro[K]) => {
-    setForm((atual) => ({ ...atual, [campo]: valor }));
-    setErros((atual) => ({ ...atual, [campo]: undefined }));
-  };
 
   const enviar = async () => {
-    const novosErros = validar(form);
-    setErros(novosErros);
-    if (!semErros(novosErros)) return;
-
+    if (!validar(regras)) return;
     setErroApi(null);
     setEnviando(true);
     try {
+      // A API devolve os tokens: o guard do layout raiz leva direto para o Início
       await cadastrar({
-        nome: form.nome.trim(),
-        email: form.email.trim().toLowerCase(),
-        senha: form.senha,
-        tipo: form.tipo,
-        cpf: ehFamiliar ? undefined : textoOpcional(form.cpf),
-        telefone: ehFamiliar ? form.telefone : undefined,
-        idIdoso: ehFamiliar ? Number(form.codigoIdoso) : undefined,
+        nome: valores.nome.trim(),
+        cpf: textoOpcional(valores.cpf),
+        email: valores.email.trim().toLowerCase(),
+        senha: valores.senha,
       });
     } catch (erro) {
       setErroApi(extrairMensagemErro(erro));
-    } finally {
       setEnviando(false);
     }
   };
 
   return (
     <Tela comVoltar>
-      <CabecalhoMarca subtitulo="Crie sua conta para acompanhar a rotina do idoso." />
+      <CabecalhoMarca subtitulo="Crie sua conta de cuidador(a)." />
 
-      {erroApi && <Aviso mensagem={erroApi} />}
-
-      <SeletorOpcoes
-        rotulo="Como você vai usar o app?"
-        opcoes={OPCOES_TIPO}
-        valor={form.tipo}
-        aoMudar={(tipo) => alterar('tipo', tipo)}
+      <Aviso
+        tom="info"
+        mensagem="É familiar? Peça ao cuidador para criar seu acesso na ficha do idoso e entre com o e-mail e a senha que ele cadastrar."
       />
-      <Texto variante="legenda" cor="textoSecundario">
-        {ehFamiliar
-          ? 'Familiares acompanham tudo o que o cuidador registra, apenas para visualização.'
-          : 'Cuidadores cadastram idosos, medicamentos, consultas e atividades.'}
-      </Texto>
+      {erroApi && <Aviso mensagem={erroApi} />}
 
       <CampoTexto
         rotulo="Nome"
         placeholder="Como devemos te chamar"
         maxLength={20}
         autoComplete="name"
-        value={form.nome}
+        value={valores.nome}
         onChangeText={(texto) => alterar('nome', texto)}
         erro={erros.nome}
       />
@@ -130,48 +94,25 @@ export default function TelaCadastro() {
         keyboardType="email-address"
         autoCapitalize="none"
         autoComplete="email"
-        value={form.email}
+        value={valores.email}
         onChangeText={(texto) => alterar('email', texto)}
         erro={erros.email}
       />
-
-      {ehFamiliar ? (
-        <>
-          <CampoTexto
-            rotulo="Telefone"
-            placeholder="(11) 98765-4321"
-            keyboardType="phone-pad"
-            value={form.telefone}
-            onChangeText={(texto) => alterar('telefone', mascararTelefone(texto))}
-            erro={erros.telefone}
-          />
-          <CampoTexto
-            rotulo="Código do idoso"
-            placeholder="Ex.: 12"
-            keyboardType="number-pad"
-            dica="O cuidador encontra esse código na ficha do idoso."
-            value={form.codigoIdoso}
-            onChangeText={(texto) => alterar('codigoIdoso', texto.replace(/\D/g, ''))}
-            erro={erros.codigoIdoso}
-          />
-        </>
-      ) : (
-        <CampoTexto
-          rotulo="CPF (opcional)"
-          placeholder="000.000.000-00"
-          keyboardType="number-pad"
-          value={form.cpf}
-          onChangeText={(texto) => alterar('cpf', mascararCpf(texto))}
-          erro={erros.cpf}
-        />
-      )}
-
+      <CampoTexto
+        rotulo="CPF (opcional)"
+        placeholder="000.000.000-00"
+        keyboardType="number-pad"
+        value={valores.cpf}
+        onChangeText={(texto) => alterar('cpf', mascararCpf(texto))}
+        erro={erros.cpf}
+      />
       <CampoTexto
         rotulo="Senha"
         placeholder={`Mínimo de ${TAMANHO_MINIMO_SENHA} caracteres`}
         senha
+        maxLength={72}
         autoComplete="new-password"
-        value={form.senha}
+        value={valores.senha}
         onChangeText={(texto) => alterar('senha', texto)}
         erro={erros.senha}
       />
@@ -179,8 +120,9 @@ export default function TelaCadastro() {
         rotulo="Confirme a senha"
         placeholder="Repita a senha"
         senha
+        maxLength={72}
         autoComplete="new-password"
-        value={form.confirmacaoSenha}
+        value={valores.confirmacaoSenha}
         onChangeText={(texto) => alterar('confirmacaoSenha', texto)}
         erro={erros.confirmacaoSenha}
         onSubmitEditing={enviar}
@@ -192,6 +134,9 @@ export default function TelaCadastro() {
         aoPressionar={enviar}
         carregando={enviando}
       />
+      <Texto variante="legenda" cor="textoSuave" centralizado>
+        Depois de entrar, cadastre a pessoa idosa que você cuida.
+      </Texto>
     </Tela>
   );
 }

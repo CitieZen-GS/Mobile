@@ -2,7 +2,6 @@ import { router } from 'expo-router';
 import { ReactNode } from 'react';
 import {
   KeyboardAvoidingView,
-  Platform,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -73,10 +72,12 @@ export function Tela({
 
   return (
     <SafeAreaView edges={bordas} style={[estilos.raiz, { backgroundColor: cores.fundo }]}>
-      <KeyboardAvoidingView
-        style={estilos.raiz}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      >
+      {/*
+        "padding" nas duas plataformas: no Android o app é edge-to-edge e a janela não encolhe
+        mais com o teclado, então sem behavior o campo ficaria escondido atrás dele
+        (docs.expo.dev/guides/keyboard-handling).
+      */}
+      <KeyboardAvoidingView style={estilos.raiz} behavior="padding">
         {rolavel ? (
           <ScrollView
             contentContainerStyle={estilos.conteudo}

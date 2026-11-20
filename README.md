@@ -16,13 +16,13 @@ Aplicativo para quem cuida de uma pessoa idosa. O cuidador registra medicamentos
 
 ## Links
 
-|                                   |                                                                                     |
-| --------------------------------- | ----------------------------------------------------------------------------------- |
-| Vídeo de demonstração (até 5 min) | _colar o link do YouTube aqui_                                                      |
-| Firebase App Distribution         | _colar o link de convite aqui_                                                      |
-| API de funções (Java/Spring)      | [CitieZen-GS/API-Funcoes](https://github.com/CitieZen-GS/API-Funcoes)               |
-| API de autenticação (Java/Spring) | [CitieZen-GS/API-autentificador](https://github.com/CitieZen-GS/API-autentificador) |
-| API de RAG (Java/Spring + IA)     | [CitieZen-GS/RAG](https://github.com/CitieZen-GS/RAG)                               |
+|                                   |                                                                                                                                                               |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Vídeo de demonstração (até 5 min) | [youtu.be/KZZZoOyKC70](https://youtu.be/KZZZoOyKC70)                                                                                                          |
+| Firebase App Distribution         | [Release 1.0.0 (commit 5b8b65d)](https://appdistribution.firebase.google.com/testerapps/1:828723811901:android:6f9e2ea65edfe8101abc54/releases/7nvs09dov7ok0) |
+| API de funções (Java/Spring)      | [CitieZen-GS/API-Funcoes](https://github.com/CitieZen-GS/API-Funcoes)                                                                                         |
+| API de autenticação (Java/Spring) | [CitieZen-GS/API-autentificador](https://github.com/CitieZen-GS/API-autentificador)                                                                           |
+| API de RAG (Java/Spring + IA)     | [CitieZen-GS/RAG](https://github.com/CitieZen-GS/RAG)                                                                                                         |
 
 ---
 

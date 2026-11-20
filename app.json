@@ -44,6 +44,12 @@
     "scheme": "ajudantefamiliar",
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "d3c864cd-5d6b-4172-9118-1cad8a195791"
+      }
+    },
+    "owner": "mobile-globalsolution-2tdspw"
   }
 }

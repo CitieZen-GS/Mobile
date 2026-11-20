@@ -7,11 +7,12 @@ Aplicativo para quem cuida de uma pessoa idosa. O cuidador registra medicamentos
 
 ## Integrantes
 
-| RM      | Nome completo | Turma |
-| ------- | ------------- | ----- |
-| RM00000 | _Preencher_   | 2TDS  |
-| RM00000 | _Preencher_   | 2TDS  |
-| RM00000 | _Preencher_   | 2TDS  |
+| RM       | Nome completo                        |
+| -------- | ------------------------------------ |
+| RM561551 | Gabriel Fachin de Oliveira           |
+| RM566482 | Fernando Charlles Faustino Fernandes |
+| RM565708 | Iago D. Ainette                      |
+| RM565799 | Leticia Santiago                     |
 
 ## Links
 
